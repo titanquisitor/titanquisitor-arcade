@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.0</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.1</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
 .audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
-</style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.0</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
+</style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.1</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
 <script>
 (()=>{'use strict';const canvas=document.querySelector('#game');
 const low=document.createElement('canvas');low.width=480;low.height=270;
@@ -171,7 +171,100 @@ function drawEnemy(e){
  if(boss&&!e.dead){box(x-86,y-180,172,13,'#250c20','#9c6b53');rect(x-82,y-176,164*Math.max(0,e.hp)/e.max,5,'#ec4669');txt('WOUND GUARDIAN',x,y-185,12,'#ffb9bf','center')}
 }
 
-function bg(){const sky=c.createLinearGradient(0,0,0,350);sky.addColorStop(0,'#100e25');sky.addColorStop(.45,'#3c2747');sky.addColorStop(1,'#b35c43');c.fillStyle=sky;c.fillRect(0,0,W,H);for(let i=0;i<65;i++){const x=((i*163+(i*i*7))%1000),y=((i*61)%270);rect(x,y, i%3===0?3:2,2,'#f1d9a9aa')}rect(0,290,W,130,'#2d2831');for(let i=-1;i<12;i++){let x=i*112-(cam*.22%112);rect(x,135,67,191,'#252735');rect(x+6,118,55,17,'#302d37');for(let j=0;j<4;j++)rect(x+j*18,111,12,20,'#44404a');rect(x+20,180,23,81,'#151a26');rect(x+8,295,49,5,'#7a5350')}for(let i=-1;i<19;i++){let x=i*76-(cam*.48%76);rect(x,271,18,74,'#292b30');rect(x-8,266,34,13,'#4b4543');rect(x+1,253,6,14,'#4b4543');rect(x+11,253,6,14,'#4b4543')}const floor=c.createLinearGradient(0,340,0,H);floor.addColorStop(0,'#6f5445');floor.addColorStop(.35,'#37313b');floor.addColorStop(1,'#161522');c.fillStyle=floor;c.fillRect(0,345,W,H-345);for(let i=0;i<16;i++){let y=352+i*i*.8;line(0,y,W,y,'#a88b7355',1)}for(let i=-2;i<25;i++){let x=i*90-(cam*.8%90);line(x,345,x+80,H,'#18192166',2)}for(let i=0;i<25;i++){let x=i*217-(cam*.65%217),y=350+(i*37)%175;rect(x,y,9,4,'#a2745599');rect(x+16,y+5,22,3,'#221e23')}if(level===1){rect(770,125,170,232,'#201b25');rect(793,118,122,238,'#29262e');for(let k=0;k<6;k++)rect(793+k*21,108,17,16,'#48404b');rect(827,202,56,154,'#0a0911');rect(821,195,68,11,'#c47f4f');txt('DOUREN',851,168,17,'#d1af74','center')}if(level===2){rect(810,100,136,245,'#1b1828');rect(826,121,102,210,'#161421');txt('THE DEEP',875,176,14,'#c29474','center');txt('WOUND',875,194,14,'#c29474','center');for(let i=0;i<9;i++){const r=35+i*9; c.strokeStyle=i%2?'#b13d75':'#576ad2';c.lineWidth=2;c.beginPath();c.arc(880,260,r,0,6.28);c.stroke()}}}
+
+// v1.1 Hall Strip environment renderer: layered parallax, architectural pixel details,
+// time-based torchfire and portal. Drawn locally; no external assets required.
+function v11Poly(points,col){c.fillStyle=col;c.beginPath();c.moveTo(points[0][0],points[0][1]);for(let j=1;j<points.length;j++)c.lineTo(points[j][0],points[j][1]);c.closePath();c.fill()}
+function v11Torch(x,y,phase=0){
+  rect(x-11,y-1,22,4,'#312b31');rect(x-6,y-6,12,7,'#b78d56');
+  rect(x-4,y-12,8,9,'#e0a04e');
+  const flick=Math.sin(t*.18+phase)*4;
+  rect(x-6+flick*.25,y-27+flick,12,18,'#c24732');
+  rect(x-4+flick*.3,y-34+flick,8,21,'#f8a83d');
+  rect(x-2+flick*.2,y-29+flick,4,13,'#ffe7a2');
+  c.save();let g=c.createRadialGradient(x,y-18,3,x,y-18,78);g.addColorStop(0,'#ffad4539');g.addColorStop(1,'#ffad4500');c.fillStyle=g;c.fillRect(x-85,y-106,170,175);c.restore()
+}
+function v11Pillar(x,y,height,accent='#9a826c'){
+  rect(x,y-height,30,height,'#303849');rect(x+4,y-height,5,height,'#677080');
+  rect(x+19,y-height,4,height,'#262c39');rect(x-6,y-height-12,42,11,'#485063');
+  rect(x-9,y-height-17,48,5,accent);rect(x-6,y-13,42,13,'#535465');
+  for(let h=y-height+14;h<y-15;h+=21)rect(x+8,h,10,2,'#92909a44');
+}
+function v11Ground(){
+ const g=c.createLinearGradient(0,344,0,H);g.addColorStop(0,level===2?'#4d374c':'#665662');g.addColorStop(.34,'#38323d');g.addColorStop(1,'#161722');c.fillStyle=g;c.fillRect(0,344,W,H-344);
+ rect(0,344,W,7,level===2?'#ce668b':'#ae9774');
+ for(let row=0;row<11;row++){
+  const y=355+row*17;let offset=(Math.floor(cam*.87)+(row%2)*47)%108;
+  line(0,y,W,y,level===2?'#8d557666':'#b5a08a44',2);
+  for(let x=-125;x<W+110;x+=108){const xx=x-offset;rect(xx,y+2,2,14,'#0b111b55');rect(xx+7,y+5,34,1,'#b1a19125')}
+ }
+ for(let i=0;i<19;i++){const x=((i*173+49)-cam*.73)%1250;if(x>-20&&x<W+20){rect(x,359+(i*47)%158,9+(i%3)*5,3,'#d2b69666');rect(x+18,362+(i*47)%158,4,3,'#212131')}}
+ if(level===2){for(let i=0;i<8;i++){const x=((i*157)-cam*.42)%1200;v11Poly([[x,387+i%3*37],[x+33,390+i%3*37],[x+71,400+i%3*37],[x+45,406+i%3*37]],'#a34876');rect(x+27,392+i%3*37,9,4,'#e991bc')}}
+}
+function bg(){
+ const wound=level===2,fort=level===1;
+ const sky=c.createLinearGradient(0,0,0,345);
+ if(wound){sky.addColorStop(0,'#090b21');sky.addColorStop(.58,'#321735');sky.addColorStop(1,'#7b304c')}
+ else if(fort){sky.addColorStop(0,'#0b1730');sky.addColorStop(.62,'#313755');sky.addColorStop(1,'#a36463')}
+ else{sky.addColorStop(0,'#121532');sky.addColorStop(.48,'#42436a');sky.addColorStop(1,'#ba7b72')}
+ c.fillStyle=sky;c.fillRect(0,0,W,H);
+ for(let i=0;i<65;i++){const x=(i*157+i*i*17)%W,y=(i*59)%270;rect(x,y,i%4===0?3:2,2,wound?'#c98fd377':'#ffe6b777')}
+ if(!wound){
+  const moonX=755-(cam*.035%65);rect(moonX,74,43,43,'#e9d1b3');rect(moonX+9,68,30,9,'#fff3d5');
+  for(let layer=0;layer<3;layer++){const shade=['#4c4b73','#363e61','#2b3450'][layer],rate=[.07,.15,.28][layer],base=220+layer*45;
+   for(let i=-2;i<9;i++){let x=i*222-(cam*rate%222);v11Poly([[x-135,base+42],[x+20,base-78+(i%3)*14],[x+106,base+1],[x+227,base+42]],shade);v11Poly([[x-12,base-39+(i%3)*14],[x+20,base-78+(i%3)*14],[x+49,base-41+(i%3)*12]],'#b6a6ae55')}
+  }
+ }
+ if(level===0){
+  // Distant fortress towers growing out of the mountains
+  for(let i=-2;i<8;i++){const x=i*246-(cam*.27%246);
+   rect(x+35,210,140,130,'#3b3b53');rect(x+22,198,36,142,'#36364c');rect(x+154,187,35,153,'#36364c');
+   for(let k=0;k<5;k++)rect(x+34+k*30,199,19,10,'#57516a');
+   rect(x+98,269,22,55,'#171c31');rect(x+103,283,7,17,'#e9a65b88')
+  }
+  // Ancient ruined Greek columns with broken cornices, dark twisted trees
+  for(let i=-1;i<9;i++){const x=i*235-(cam*.53%235);
+   v11Pillar(x+62,340,115+(i%3)*17);rect(x+21,218,128,10,'#686473');rect(x+21,214,128,4,'#c6a77b');
+   if(i%2===0){line(x+185,339,x+183,273,'#222a37',10);line(x+182,293,x+158,267,'#222a37',7);line(x+183,305,x+207,280,'#222a37',6)}
+   v11Torch(x+118,326,i)
+  }
+ }else if(fort){
+  // Grand Douren curtain wall, crenellations and recessed arched windows
+  rect(0,157,W,192,'#333b4e');rect(0,163,W,10,'#606477');
+  for(let i=-2;i<13;i++){const x=i*104-(cam*.36%104);rect(x,139,78,23,'#495165');rect(x+13,132,51,9,'#737181');rect(x+4,176,92,5,'#1d2838');}
+  for(let i=-2;i<15;i++){const x=i*86-(cam*.44%86);
+   rect(x,196,84,65,'#41485a');rect(x+3,199,79,3,'#7a7785');
+   rect(x+12,223,27,49,'#181f33');rect(x+18,225,13,28,'#b07a5f');
+   rect(x+55,210,7,44,'#908079');
+   rect(x+6,277,75,3,'#161b2f');
+  }
+  for(let i=-2;i<8;i++){const x=i*244-(cam*.66%244);
+   v11Pillar(x+39,349,152,'#d7b17a');
+   rect(x+80,175,113,18,'#414457');rect(x+81,183,110,4,'#d0a66b');
+   rect(x+154,189,25,105,'#652a45');rect(x+159,196,15,71,'#a33e5b');
+   rect(x+162,215,9,6,'#e1ba78');rect(x+160,285,13,9,'#dfb678');
+   v11Torch(x+113,287,i)
+  }
+ }else{
+  // Obsidian sanctuary: columns, glowing cracks, violent rift behind boss.
+  for(let i=-2;i<10;i++){const x=i*182-(cam*.16%182);
+    rect(x,162,116,190,'#1b1d33');rect(x+9,169,15,172,'#454159');
+    rect(x-12,151,146,18,'#33314a');rect(x-18,146,158,6,'#765577');
+    rect(x+23,188,67,104,'#090e25');
+    rect(x+42,193,29,65,'#602c5b88')
+  }
+  const px=790-(cam*.08%75),py=244;
+  c.save();let halo=c.createRadialGradient(px,py,20,px,py,184);halo.addColorStop(0,'#f84eaa89');halo.addColorStop(.52,'#9542c94d');halo.addColorStop(1,'#9025c000');c.fillStyle=halo;c.fillRect(px-190,py-190,380,380);
+  for(let i=0;i<7;i++){c.strokeStyle=i%2?'#fe65a9':'#9d77f5';c.lineWidth=3+(i%3);c.beginPath();c.ellipse(px,py,42+i*13+Math.sin(t*.033+i)*4,94+i*7,Math.sin(t*.008+i)*.15,0,Math.PI*2);c.stroke()}
+  c.restore();rect(px-12,189,24,111,'#190f36');rect(px-6,204,12,73,'#ef79c288');
+  for(let i=-1;i<7;i++){const x=i*194-(cam*.58%194);v11Pillar(x+60,344,120+(i%3)*35,'#9d6589');v11Torch(x+120,331,i)}
+  for(let i=0;i<35;i++){let x=(i*113+t*(i%3+1)*.28)%W,y=(i*37-t*.25+H*20)%335;rect(x,y,2+(i%3),2,i%2?'#ef76bb':'#9c88ed')}
+ }
+ v11Ground();
+ // Narrow foreground architectural trim, always below HUD and the combatants.
+ rect(0,337,W,5,level===2?'#a95780':'#9b8979');
+ for(let i=0;i<13;i++){const x=i*96-(cam*.82%96);rect(x,337,51,2,'#d3b99655')}
+}
 function drawHud(){rect(0,0,W,63,'#080811ec');rect(0,60,W,3,'#b38b48');drawHero(42,58,hero,.5,0,1,false);txt(heroes[hero].name,78,20,17,heroes[hero].color);box(77,27,254,19,'#2b1123','#d0a351');rect(81,31,246*(player.hp/player.maxhp),11,player.hp>45?'#df597a':'#e04641');txt('HP',336,43,12,'#dcc598');box(375,27,165,19,'#191b2c','#b89b54');rect(379,31,157*(player.energy/100),11,'#61badd');txt('MAGIC',548,42,12,'#9ddcec');txt('SCORE '+score,690,22,15,'#e7c17d');txt('KO '+kills,690,47,14,'#b6c9d0');/* stage title moved into objective panel below HUD */}
 function drawObjective(){
  // Distinct stage label and objective, rendered against opaque black instead of scenery.
