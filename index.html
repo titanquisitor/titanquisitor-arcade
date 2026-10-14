@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.3.2 Guardian Combat Balance</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.3.3 Guardian Attack Priority</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
 .audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
 </style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.3</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
@@ -440,14 +440,20 @@ cam=Math.max(0,cam);world=Math.max(world,player.x-300);spawnClock--;if(level===0
  if(e.stun>0){e.stun--;e.windup=0;e.shotWindup=0;return}
  let d=e.x-player.x,yd=player.y-e.y;
  e.face=d<0?1:-1;e.walk+=.17;e.cd--;
+ // The Guardian never sacrifices a point-blank melee opportunity for a spell.
+ if(e.kind==='boss'&&e.shotWindup>0&&Math.abs(d)<145){
+  e.shotWindup=0;
+  e.shotCooldown=Math.max(e.shotCooldown,100);
+ }
  if(e.shotWindup>0){
   e.shotWindup--;
   if(e.shotWindup===0){fireEnemyShot(e);e.shotCooldown=e.kind==='boss'?Math.floor(rand(235,310)):Math.floor(rand(280,430))}
   return;
  }
- // Ranged attacks remain rare, and never fire within close melee distance.
+ // Melee windups cannot be interrupted by magic. At point-blank range,
+ // the Guardian keeps fighting instead of freezing to cast.
  e.shotCooldown--;
- if(e.shooter&&e.shotCooldown<=0&&Math.abs(d)>(e.kind==='boss'?75:145)&&Math.abs(d)<600&&Math.abs(yd)<100&&enemyShots.length<3){
+ if(e.shooter&&e.windup===0&&e.shotCooldown<=0&&Math.abs(d)>(e.kind==='boss'?175:145)&&Math.abs(d)<600&&Math.abs(yd)<100&&enemyShots.length<3){
   e.shotWindup=e.kind==='boss'?48:43;
   e.shotAimX=player.x;e.shotAimY=player.y-38;
   e.windup=0;
@@ -459,10 +465,10 @@ cam=Math.max(0,cam);world=Math.max(world,player.x-300);spawnClock--;if(level===0
   e.windup--;
   if(e.windup===0){
    if(Math.abs(e.x-player.x)<(e.kind==='boss'?119:66)&&Math.abs(e.y-player.y)<55&&player.z<25)hurt(e.kind==='boss'?26:e.kind==='brute'?18:11);
-   e.cd=e.kind==='boss'?49:100;
+   e.cd=e.kind==='boss'?34:100;
   }
  }else if(Math.abs(d)<(e.kind==='boss'?112:60)&&Math.abs(yd)<45&&e.cd<=0){
-  e.windup=e.kind==='boss'?22:20;e.cd=999;
+  e.windup=e.kind==='boss'?20:20;e.cd=999;
  }
 });updateEnemyShots();enemies=enemies.filter(e=>!e.dead||e.death>0);if(guardianDefeated){clearClock++;if(clearClock>=90){mode='win';pressed.clear()}}screenShake=Math.max(0,screenShake-1)}
 function play(){c.save();if(screenShake)c.translate(rand(-screenShake*.4,screenShake*.4),rand(-screenShake*.3,screenShake*.3));bg();enemies.filter(e=>e.y<player.y).sort((a,b)=>a.y-b.y).forEach(drawEnemy);if(player.inv%6<3){drawHero(player.x-cam,player.y-player.z,hero,1,player.walk,player.facing,true,player.attack>0?'attack':player.special>0?'magic':player.z>0?'jump':(keys.has('ArrowLeft')||keys.has('ArrowRight')||keys.has('ArrowUp')||keys.has('ArrowDown')||keys.has('KeyA')||keys.has('KeyD')||keys.has('KeyW')||keys.has('KeyS'))?'walk':'idle')}enemies.filter(e=>e.y>=player.y).sort((a,b)=>a.y-b.y).forEach(drawEnemy);drawEnemyShots();if(player.attack>0)drawStrikeEffect(player.x-cam,player.y-player.z,hero,player.facing,player.attack);if(player.special>0){c.strokeStyle=heroes[hero].color;c.lineWidth=5;for(let i=0;i<3;i++){c.beginPath();c.ellipse(player.x-cam,player.y-36-player.z,35+(25-player.special)*8+i*19,16+(25-player.special)*2,0,0,Math.PI*2);c.stroke()}}drawParticles();drawHud();drawObjective();if(world<280&&t<120){box(260,288,440,45,'#090914','#b18a4b');txt('DEFEND THE ECHO ROAD!  →',W/2,318,22,'#ffdb8c','center');}c.restore();if(paused){rect(0,0,W,H,'#000b');txt('PAUSED',480,250,44,'#f4cd74','center');txt('PRESS P TO CONTINUE',480,290,17,'#ddd','center')}}
