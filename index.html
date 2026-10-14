@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v0.9</title><style>
+:root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
+.audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
+</style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v0.9</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · Readable objectives, visible death sequences, and HP bars · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
+<script>
+(()=>{'use strict';const canvas=document.querySelector('#game');
+const low=document.createElement('canvas');low.width=480;low.height=270;
+const c=low.getContext('2d',{alpha:false});c.imageSmoothingEnabled=false;c.scale(.5,.5);
+const screen=canvas.getContext('2d',{alpha:false});screen.imageSmoothingEnabled=false;
+const W=960,H=540;const keys=new Set(),pressed=new Set();let mode='title',hero=0,player=null,enemies=[],sparks=[],texts=[],level=0,world=0,cam=0,t=0,spawnClock=0,bossSpawned=false,score=0,kills=0,paused=false,screenShake=0,gateOpen=false,clearClock=0,guardianDefeated=false,padPrev={};const colors={gold:'#eabd63',silver:'#cfccd0',pink:'#ff5aaf',cyan:'#7defff'};const heroes=[{name:'TITAN',title:'THE HAMMER OF THE HALLS',weapon:'WARHAMMER',maxhp:160,speed:2.45,dmg:34,reach:96,cd:30,sp:55,color:'#e1b85d',special:'THUNDERCLAP'},{name:'THALIA',title:'THE LAUGHING BLADE',weapon:'TWIN DAGGERS',maxhp:105,speed:4.25,dmg:16,reach:73,cd:13,sp:44,color:'#ef75ac',special:'WHIRLWIND'},{name:'THEIA',title:'KEEPER OF THE FLAME',weapon:'ARCANE STAFF',maxhp:115,speed:3.05,dmg:22,reach:132,cd:24,sp:50,color:'#eb9b72',special:'SOLAR FLARE'},{name:'STINGER',title:'THE DARK AVENGER',weapon:'BATTLE AXE',maxhp:140,speed:3.35,dmg:27,reach:88,cd:23,sp:53,color:'#9eb8d9',special:'SCORPION STRIKE'}];
+// Original procedural 16-bit-inspired audio; no downloads or external dependencies.
+let ac=null,master=null,soundOn=true,musicTimer=0,musicBeat=0,musicTheme='',musicScheduled=0;
+const tunes={title:{bpm:112,mel:[64,67,71,76,74,71,67,69,64,67,72,76,79,76,72,71],bass:[40,40,43,43,45,45,43,43]},story:{bpm:82,mel:[57,null,60,64,62,null,60,null,57,60,64,67,64,62,60,null],bass:[33,33,36,36,38,38,36,36]},play:{bpm:142,mel:[64,67,69,71,72,71,69,67,64,67,72,74,76,74,72,69],bass:[40,40,43,43,45,45,43,43]},boss:{bpm:158,mel:[52,55,58,59,58,55,52,50,52,55,58,62,61,58,55,53],bass:[28,28,31,31,30,30,26,26]},win:{bpm:108,mel:[67,71,74,79,76,79,83,86,83,79,76,74,79,null,79,null],bass:[43,43,47,47,48,48,43,43]},dead:{bpm:74,mel:[64,62,59,57,55,null,52,null,57,55,52,50,48,null,48,null],bass:[40,40,36,36,33,33,28,28]}};
+function ensureAudio(){if(!soundOn)return false;try{if(!ac){const C=window.AudioContext||window.webkitAudioContext;if(!C)return false;ac=new C();master=ac.createGain();master.gain.value=.22;master.connect(ac.destination)}if(ac.state==='suspended')ac.resume().catch(()=>{});return true}catch(_){return false}}
+function freq(n){return 440*Math.pow(2,(n-69)/12)}
+function note(n,start,len,type='square',vol=.12,filterHz=0){if(!ac||!soundOn||n===null||n===undefined)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq(n),start);let last=g;if(filterHz){const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=filterHz;g.connect(f);last=f}last.connect(master);o.connect(g);g.gain.setValueAtTime(.0001,start);g.gain.exponentialRampToValueAtTime(vol,start+.009);g.gain.exponentialRampToValueAtTime(.0001,start+len);o.start(start);o.stop(start+len+.015)}
+function noise(start,len=.08,vol=.15){if(!ac||!soundOn)return;const size=Math.max(200,Math.floor(ac.sampleRate*len)),buffer=ac.createBuffer(1,size,ac.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,1.5);const src=ac.createBufferSource(),g=ac.createGain(),f=ac.createBiquadFilter();f.type='highpass';f.frequency.value=450;src.buffer=buffer;g.gain.value=vol;src.connect(f);f.connect(g);g.connect(master);src.start(start)}
+function fx(name){if(!ensureAudio()||!ac)return;let at=ac.currentTime+.004;switch(name){case 'select':note(72,at,.08,'square',.10);note(79,at+.07,.13,'triangle',.12);break;case 'jump':note(57,at,.06,'square',.12);note(64,at+.06,.13,'square',.09);break;case 'swing':noise(at,.055,.09);note(42,at,.07,'sawtooth',.09);break;case 'hit':noise(at,.12,.20);note(37,at,.13,'sawtooth',.12);break;case 'hurt':noise(at,.18,.12);note(34,at,.2,'square',.13);break;case 'special':for(let i=0;i<5;i++)note(64+i*3,at+i*.048,.18,'triangle',.10);noise(at+.09,.18,.09);break;case 'ko':note(55,at,.1,'sawtooth',.1);note(43,at+.09,.22,'triangle',.13);break;case 'boss':for(let i=0;i<4;i++)note(36+i*2,at+i*.14,.25,'sawtooth',.14);noise(at+.2,.35,.1);break;case 'stage':for(let i=0;i<4;i++)note([60,64,67,72][i],at+i*.09,.23,'triangle',.12);break;case 'win':for(let i=0;i<8;i++)note([60,64,67,72,76,79,84,88][i],at+i*.13,.33,'square',.12);break;case 'dead':note(52,at,.28,'triangle',.12);note(47,at+.23,.3,'triangle',.12);break}}
+function musicLoop(){if(!ac||!soundOn||ac.state!=='running')return;const requested=mode==='title'?'title':mode==='story'?'story':mode==='win'?'win':mode==='dead'?'dead':bossSpawned&&!guardianDefeated?'boss':'play';if(requested!==musicTheme){musicTheme=requested;musicBeat=0;musicScheduled=ac.currentTime+.06}const song=tunes[musicTheme];if(!song)return;const beatLen=60/song.bpm/2;let safe=0;while(musicScheduled<ac.currentTime+.18&&safe++<12){const idx=musicBeat%song.mel.length;note(song.mel[idx],musicScheduled,beatLen*.78,'square',.075,2100);if(musicBeat%2===0)note(song.bass[Math.floor(musicBeat/2)%song.bass.length],musicScheduled,beatLen*1.8,'triangle',.105,850);if(musicBeat%4===0)noise(musicScheduled,.04,.035);else if(musicBeat%4===2)noise(musicScheduled,.025,.018);musicBeat++;musicScheduled+=beatLen}}
+function enableSound(){const first=!ac;if(ensureAudio()&&first){musicTheme='';musicScheduled=0;fx('select')}}
+const soundButton=document.getElementById('sound-toggle');soundButton.addEventListener('click',()=>{soundOn=!soundOn;soundButton.textContent=soundOn?'♫ SOUND ON':'♪ SOUND OFF';soundButton.setAttribute('aria-pressed',String(soundOn));if(master&&ac)master.gain.setTargetAtTime(soundOn?.22:0,ac.currentTime,.015);if(soundOn)enableSound()});
+setInterval(musicLoop,45);
+function rect(x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.floor(x),Math.floor(y),Math.ceil(w),Math.ceil(h))}
+function txt(s,x,y,size=16,col='#fff',align='left'){c.save();c.font=`bold ${size}px monospace`;c.textAlign=align;c.textBaseline='alphabetic';c.lineJoin='round';c.miterLimit=2;c.lineWidth=Math.max(4,Math.round(size*.30));c.strokeStyle='#07070d';c.strokeText(s,x,y);c.fillStyle=col;c.fillText(s,x,y);c.restore()}
+function line(x,y,x2,y2,col,w=2){c.strokeStyle=col;c.lineWidth=w;c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.stroke()}function box(x,y,w,h,bg='#120f1c',edge='#b78a48'){rect(x,y,w,h,edge);rect(x+3,y+3,w-6,h-6,bg)}function rand(a,b){return a+Math.random()*(b-a)}function pressedNow(k){if(pressed.has(k)){pressed.delete(k);return true}return false}function anyPressed(...ks){return ks.some(k=>pressedNow(k))}function clamp(v,a,b){return Math.max(a,Math.min(b,v))}function reset(){const h=heroes[hero];player={x:95,y:425,z:0,vz:0,hp:h.maxhp,maxhp:h.maxhp,facing:1,attack:0,cd:0,special:0,inv:0,energy:100,walk:0,combo:0};enemies=[];sparks=[];texts=[];world=0;cam=0;level=0;spawnClock=95;bossSpawned=false;gateOpen=false;guardianDefeated=false;score=0;kills=0;screenShake=0;clearClock=0;mode='story'}function addText(x,y,s,col='#ffd47c',type='hit'){texts.push({x,y,s,col,life:type==='ko'?85:48,type})}function dust(x,y,n,col){for(let i=0;i<n;i++)sparks.push({x,y,vx:rand(-4,4),vy:rand(-5,2),life:rand(16,35),col,size:rand(2,6)})}function spawn(kind='hollow'){const boss=kind==='boss';enemies.push({kind,x:boss?player.x+265:player.x+rand(250,420),y:boss?player.y:rand(365,468),hp:boss?420:kind==='brute'?104:55,max:boss?420:kind==='brute'?104:55,speed:boss?1.1:kind==='brute'?1.25:rand(1.25,1.85),cd:rand(40,85),stun:0,face:-1,walk:0,hit:0,windup:0,death:0,dead:false,deathVx:0,size:boss?1.9:kind==='brute'?1.32:1})}function attack(special=false){if(!player||player.cd>0||player.hp<=0)return;const h=heroes[hero];if(special){if(player.energy<35)return;fx('special');player.energy-=35;player.cd=43;player.special=25;screenShake=13;dust(player.x-cam,player.y-38,25,h.color)}else{fx('swing');player.cd=h.cd;player.attack=12;player.combo=(player.combo+1)%3}let hits=0;enemies.forEach(e=>{if(e.dead||e.hp<=0)return;const dx=e.x-player.x,dy=Math.abs(e.y-player.y);const reach=special? (hero===2?250:hero===0?175:145):h.reach;const valid=special ? Math.abs(dx)<reach : dx*player.facing>-22&&dx*player.facing<reach;if(valid&&dy<(special?95:53)){let damage=special?h.sp:h.dmg*(player.combo===0?1.4:1);e.hp=Math.max(0,e.hp-damage);fx('hit');e.stun=special?36:16;e.hit=10;e.x+=(dx>=0?1:-1)*(special?47:22);dust(e.x-cam,e.y-42,special?20:9,special?h.color:'#d9bd83');addText(e.x-cam,e.y-80,'-'+Math.round(damage),special?'#ff9acb':'#f4d393');hits++;if(e.hp<=0&&!e.dead){e.dead=true;e.death=52;e.windup=0;e.stun=0;e.deathVx=(dx>=0?1:-1)*(e.kind==='boss'?3.6:2.6);fx('ko');const points=e.kind==='boss'?1500:e.kind==='brute'?150:75;score+=points;kills++;dust(e.x-cam,e.y-50,25,'#a6c1dd');addText(e.x-cam,e.y-(e.kind==='boss'?175:112),'+'+points,'#ffdd81','ko');if(e.kind==='boss'){guardianDefeated=true;fx('win');clearClock=0;screenShake=24;addText(player.x-cam,player.y-165,'THE GUARDIAN FALLS!','#ffe39a','ko');player.inv=240;}}}});if(hits&&special)addText(player.x-cam,player.y-130,h.special,h.color)}function hurt(a){if(player.inv>0)return;fx('hurt');player.hp=Math.max(0,player.hp-a);player.inv=55;screenShake=10;dust(player.x-cam,player.y-35,16,'#f07575');addText(player.x-cam,player.y-90,'-'+a,'#ff6262');if(player.hp<=0){mode='dead';fx('dead')}}
+// Hand-authored 48x72 pixel sprites, rendered as discrete hard-edged pixels.
+// Each hero has idle, walking, attacking, jumping, casting and victory frames.
+const spriteCache=new Map();
+function makeSprite(id,pose,phase){const key=id+':'+pose+':'+phase;if(spriteCache.has(key))return spriteCache.get(key);
+ const cv=document.createElement('canvas');cv.width=48;cv.height=72;
+ const q=cv.getContext('2d');q.imageSmoothingEnabled=false;
+ const px=(x,y,w,h,col)=>{q.fillStyle=col;q.fillRect(x|0,y|0,w|0,h|0)};
+ const palettes=[
+ {skin:'#c99b73',light:'#f2c796',hair:'#a3a6ad',dark:'#555a67',cloth:'#dfb45c',trim:'#fff0a8',boots:'#55465b',metal:'#c1d0da'},
+ {skin:'#dca17d',light:'#f1c2a1',hair:'#17131c',dark:'#080810',cloth:'#261426',trim:'#e8bf59',boots:'#3a1935',metal:'#e4dfea'},
+ {skin:'#e6ad86',light:'#f6ceb0',hair:'#b95831',dark:'#70321f',cloth:'#f4e7ce',trim:'#f1bd57',boots:'#b68b5a',metal:'#f5da87'},
+ {skin:'#b58b70',light:'#d6a887',hair:'#161622',dark:'#10101a',cloth:'#283047',trim:'#acb7d4',boots:'#151922',metal:'#b2c5cd'}];
+ const p=palettes[id], walking=pose==='walk', attacking=pose==='attack', casting=pose==='magic', jumping=pose==='jump',winning=pose==='win';
+ const offset=walking?(phase===0?1:-1):0;
+ // Pixel-sized silhouette: cape, boots, stance and torso.
+ px(10,29,28,31,id===2?'#ad542f':id===1?'#1b0a21':id===0?'#90682e':'#151928');
+ px(12,52+(walking?phase*2:0),10,16,p.boots);px(26,52+(walking?(1-phase)*2:0),10,16,p.boots);
+ px(10,65,14,5,'#1c141b');px(25,65,14,5,'#1c141b');
+ px(12,30,25,26,p.cloth);px(12,51,26,5,p.trim);
+ px(17,32,15,17,id===0?'#ae7e3d':id===1?'#351d32':id===2?'#fff1d9':'#404d65');
+ // Shoulders and asymmetric attack arm pose.
+ px(8,31,8,10,p.trim);px(33,31,8,10,p.trim);
+ px(7,39,7,14,p.skin);
+ px(attacking?36:34,attacking?19:39,7,attacking?22:14,p.skin);
+ px(8,50,6,5,p.light);px(attacking?36:34,attacking?37:50,7,5,p.light);
+ // Character-specific hair shapes and recognizable faces.
+ px(13,10+offset,23,22,p.hair);
+ if(id===0){px(11,12,6,20,p.hair);px(31,12,7,19,p.hair);px(12,24,24,13,p.hair);px(16,29,18,10,'#d6d7d8');px(16,8,17,7,'#d6d5cf');}
+ if(id===1){px(8,12,9,35,p.hair);px(33,10,8,36,p.hair);px(9,6,31,14,p.hair);px(7,21,6,8,p.hair);px(38,21,6,8,p.hair);}
+ if(id===2){px(9,13,8,42,p.hair);px(33,11,8,43,p.hair);px(12,5,23,11,p.hair);px(8,35,7,15,'#cc7246');}
+ if(id===3){px(11,8,27,17,p.hair);px(10,20,6,23,p.hair);px(33,21,8,19,p.hair);px(15,13,19,14,'#d9dce2');px(18,17,5,7,'#20252b');px(28,17,4,7,'#20252b');}
+ px(16,16,17,15,p.skin);px(17,16,15,5,p.light);
+ if(id!==3){px(19,24,4,3,'#1c1827');px(28,24,4,3,'#1c1827');}
+ if(id===0){px(17,30,15,5,p.hair);px(20,33,9,5,p.hair);}
+ // Gold laurel headbands for the Greek cast.
+ if(id!==3){px(15,13,19,2,'#e4b44f');px(14,10,3,5,'#e4b44f');px(30,10,4,5,'#e4b44f');}
+ // Emblem on torso, belt detail.
+ px(22,39,5,5,p.trim);px(20,42,9,2,'#8d5c2d');
+ // Hand-built equipment changes position between combat and idle poses.
+ const wy=attacking?4:9;
+ if(!attacking&&id===0){px(attacking?22:38,wy,4,51,'#775132');px(attacking?8:29,wy-2,31,14,p.metal);px(attacking?10:31,wy,26,4,'#f9dfa1');px(attacking?11:32,wy+10,25,2,'#768ca2');}
+ if(!attacking&&id===1){px(attacking?30:39,attacking?5:32,3,32,'#dbe6eb');px(attacking?33:41,attacking?5:28,2,26,'#ffffff');px(attacking?6:5,attacking?9:32,3,32,'#dbe6eb');px(attacking?8:7,attacking?9:28,2,27,'#f8e7c0');px(5,56,9,3,'#d2a34c');}
+ if(!attacking&&id===2){px(40,wy-2,3,58,'#956034');px(37,wy-8,9,11,'#f7d770');px(39,wy-11,5,5,'#fff3ac');if(casting){px(32,wy-13,16,16,'#f7dd7f');px(36,wy-18,7,5,'#fef1bc');}}
+ if(!attacking&&id===3){px(attacking?26:39,wy-3,4,61,'#684b39');px(attacking?10:26,wy-5,27,25,p.metal);px(attacking?12:28,wy-3,22,8,'#edf1e6');px(attacking?29:45,wy+2,7,14,'#8198a8');}
+ if(jumping)px(20,66,8,2,'#e8d2a0');
+ if(winning){px(6,7,4,24,p.skin);px(36,4,4,26,p.skin);px(8,1,5,8,p.light);px(35,0,5,8,p.light)}
+ if(casting){px(16,4,16,5,'#ffe8a0');px(23,0,3,4,'#fff6d5')}
+ spriteCache.set(key,cv);return cv;
+}
+// Weapons are drawn independently of the sprite so their swings have a readable silhouette.
+// These graphics use the same integer pixel grid as the heroes; 0 = windup, 1 = impact, 2 = recovery.
+function pixelBlade(x,y,w,h,col){rect(x,y,w,h,'#18212b');rect(x+2,y+1,w-4,h-2,col);rect(x+w-4,y+2,2,Math.max(2,h-4),'#fff5c9')}
+function drawWeaponAction(id,stage,combo){
+ c.save();
+ // Sprite origin is at feet. Right-facing weapon silhouettes extend well outside the character.
+ if(id===0){ // Titan: overhead warhammer to broad horizontal smash
+  if(stage===0){rect(24,-115,8,69,'#805331');rect(6,-121,50,22,'#a9bdc8');rect(9,-119,44,6,'#f5e5b2')}
+  if(stage===1){rect(23,-60,69,9,'#845732');rect(73,-83,28,47,'#97afc3');rect(76,-80,22,10,'#fff0c4');rect(80,-43,17,5,'#65798c')}
+  if(stage===2){rect(23,-26,68,8,'#805331');rect(78,-47,27,42,'#a6b9c8');rect(79,-46,23,9,'#fff3c7')}
+ }else if(id===1){ // Thalia: alternating, crossing dual-dagger slashes
+  if(stage===0){rect(26,-92,5,44,'#c79548');pixelBlade(26,-113,9,28,'#dceafa');rect(-13,-79,5,31,'#c79548');pixelBlade(-15,-101,9,27,'#e7ecff')}
+  if(stage===1){rect(27,-67,44,5,'#b18c57');pixelBlade(60,-75,27,16,'#f3e9fa');rect(31,-38,37,5,'#c89b5c');pixelBlade(61,-44,26,16,'#ecddf5')}
+  if(stage===2){rect(20,-39,45,5,'#c9a366');pixelBlade(59,-45,22,14,'#e3e4fa');rect(17,-75,39,5,'#c9a366');pixelBlade(49,-81,21,14,'#e8d7f9')}
+ }else if(id===2){ // Theia: extended golden staff + magical beam on impact
+  if(stage===0){rect(18,-115,6,88,'#987047');rect(13,-123,17,18,'#fad878');rect(17,-128,9,8,'#fff3b6')}
+  if(stage===1){rect(25,-60,111,7,'#936238');rect(124,-67,23,22,'#f4c65d');rect(129,-74,14,35,'#ffed9a');rect(142,-60,44,7,'#8be4ff');rect(185,-57,11,3,'#f8ffff')}
+  if(stage===2){rect(21,-79,87,6,'#936238');rect(97,-88,16,21,'#f0ca69');rect(100,-92,9,7,'#fff3b6')}
+ }else{ // Stinger: axe raised, gigantic downward chop, then follow through
+  if(stage===0){rect(24,-127,7,89,'#845837');rect(2,-130,48,36,'#9cbbc6');rect(5,-127,39,9,'#f3e6bf')}
+  if(stage===1){rect(30,-89,11,89,'#835432');rect(22,-31,60,31,'#b7cbd3');rect(24,-29,55,8,'#f3e8c7');rect(72,-26,11,23,'#637e92')}
+  if(stage===2){rect(24,-27,91,8,'#8b5c37');rect(94,-46,37,42,'#aac5d0');rect(96,-45,31,9,'#fff1bf')}
+ }
+ c.restore();
+}
+function drawStrikeEffect(x,y,id,facing,remaining){
+ const progress=(12-remaining)/12;
+ const stage=progress<.25?0:progress<.7?1:2;
+ if(stage!==1)return;
+ c.save();c.translate(Math.round(x),Math.round(y));c.scale(facing,1);
+ const col=['#f6d684','#fa91c1','#98efff','#e5e6ed'][id];
+ c.globalAlpha=.86;c.lineCap='square';c.lineWidth=id===0?9:5;c.strokeStyle=col;c.beginPath();
+ if(id===0)c.arc(71,-64,54,-1.4,.35);
+ else if(id===1){c.arc(64,-58,40,-1.2,.5);c.moveTo(32,-31);c.lineTo(123,-102)}
+ else if(id===2){c.moveTo(55,-59);c.lineTo(200,-59);c.moveTo(140,-68);c.lineTo(178,-68)}
+ else c.arc(76,-57,59,-1.5,.75);
+ c.stroke();c.globalAlpha=1;
+ for(let i=0;i<4;i++)rect(85+i*13,-76+(i%2)*29,7,5,col);
+ c.restore();
+}
+function drawHero(x,y,id,scale=1,walk=0,facing=1,weapon=true,pose='idle'){
+ let action=pose;if(action==='idle'&&Math.abs(walk)>.7)action='walk';
+ const phase=(Math.floor(Math.abs(walk)*2)%2);
+ const sprite=makeSprite(id,action,phase);
+ c.save();c.translate(Math.round(x),Math.round(y));c.scale(facing*scale,scale);
+ rect(-21,0,42,4,'#0008');c.imageSmoothingEnabled=false;
+ c.drawImage(sprite,-36,-108,72,108);if(pose==='attack'&&weapon)drawWeaponAction(id,Math.max(0,Math.min(2,Math.floor((12-player.attack)/4))),player.combo);c.restore();
+}
+function drawEnemy(e){
+ const x=e.x-cam,y=e.y,boss=e.kind==='boss',brute=e.kind==='brute';
+ const s=e.size,step=Math.sin(e.walk*2)*3,stagger=e.hit>0;
+ c.save();c.translate(Math.round(x),Math.round(y));
+ if(e.dead){const progress=1-e.death/52;c.globalAlpha=progress>.65?Math.max(0,(1-progress)/.35):1;c.translate(0,-Math.sin(progress*Math.PI)*20);c.rotate((e.deathVx>=0?1:-1)*Math.min(1,progress*2)*1.15);c.translate(0,progress*17)}
+ c.scale(s*e.face,s);
+ // Shadows and telegraphs make enemy position and imminent attacks legible.
+ rect(-27,0,54,6,'#0008');
+ if(e.windup>0){c.strokeStyle=boss?'#ff588c':'#e8a765';c.lineWidth=2;c.beginPath();c.ellipse(0,-17,25+(e.windup%6)*2,10,0,0,6.283);c.stroke();}
+ if(boss){
+  // The Wound Guardian: horned armored juggernaut, ritual heart, blade and mantle.
+  rect(-21,-16,15,18,'#292636');rect(7,-16,15,18,'#292636');rect(-25,-11,20,8,'#807383');rect(5,-11,20,8,'#807383');
+  rect(-27,-84,55,72,stagger?'#fff2dd':'#403147');rect(-23,-79,47,60,stagger?'#e9d5d3':'#6c4b66');
+  rect(-33,-78,11,51,'#8d5976');rect(25,-78,10,51,'#8d5976');
+  rect(-35,-80,70,12,'#b37e65');rect(-25,-65,52,7,'#231a2d');
+  rect(-19,-117,40,33,stagger?'#e9e9ed':'#a19bac');rect(-21,-116,12,13,'#483b52');rect(13,-116,12,13,'#483b52');
+  // Curved crown horns, deliberately exaggerated to be visible at game scale.
+  line(-17,-111,-30,-138,'#d8b67d',7);line(-30,-138,-37,-148,'#fff0ad',5);line(17,-111,30,-138,'#d8b67d',7);line(30,-138,37,-148,'#fff0ad',5);
+  rect(-13,-106,9,6,'#ff3b7f');rect(7,-106,9,6,'#ff3b7f');rect(-8,-94,18,4,'#181522');
+  // The cursed chest emblem pulses like the Deep Wound itself.
+  rect(-12,-57,26,25,'#120f25');rect(-8,-53,18,18,'#b8477c');rect(-4,-49,10,10,Math.floor(t/8)%2?'#ffca94':'#70bcff');
+  // Oversized cleaver and a spiked gauntlet.
+  line(24,-73,43,-50,'#a998b2',9);line(43,-50,58,-22,'#a998b2',7);line(58,-22,58,-102,'#a97c57',7);
+  rect(47,-115,23,46,'#c9c4ca');rect(50,-110,18,33,'#726e83');rect(47,-115,23,6,'#f3cc8d');
+  line(-28,-69,-46,-43,'#a998b2',11);rect(-51,-53,18,23,'#b17f72');
+  if(e.windup>0){line(40,-56,72,-112,'#e8c2d9',5);}
+ }else if(brute){
+  // Brute: broad silhouette, riveted shoulder plates and hammer fists.
+  rect(-18,-13,14+step*.2,15,'#343c41');rect(7,-13,14-step*.2,15,'#343c41');
+  rect(-22,-60,44,46,stagger?'#eef2e9':'#4e685e');rect(-31,-59,14,23,'#91a58b');rect(18,-59,14,23,'#91a58b');
+  rect(-33,-40,16,25,'#58685e');rect(19,-40,16,25,'#58685e');rect(-37,-21,20,13,'#a6a48d');rect(20,-21,20,13,'#a6a48d');
+  rect(-14,-82,28,24,stagger?'#ffffff':'#788579');rect(-10,-77,8,6,'#fb4972');rect(5,-77,8,6,'#fb4972');
+  rect(-10,-66,20,4,'#1d2426');rect(-21,-62,42,7,'#a7a38b');rect(-15,-43,31,6,'#b3a387');
+  rect(-22,-86,10,13,'#c4c0a2');rect(14,-86,10,13,'#c4c0a2');
+ }else{
+  // Hollowborn: ashen spectral bodies, clawed arms, crimson eyes and tattered robes.
+  rect(-12,-12,9,14,'#292a37');rect(5,-12,9,14,'#292a37');
+  rect(-17,-53,35,44,stagger?'#ffffff':'#ddd9d2');rect(-18,-23,9,17,'#b7b8bd');rect(12,-23,9,17,'#adaeba');
+  rect(-22,-47,9,29,'#bcbcc3');rect(15,-48,9,28,'#bcbcc3');
+  line(-22,-26,-31,-16,'#b6b4bd',4);line(23,-24,33,-16,'#b6b4bd',4);
+  rect(-14,-76,29,25,stagger?'#ffffff':'#efede8');rect(-9,-70,7,5,'#ff5479');rect(6,-70,7,5,'#ff5479');
+  rect(-8,-57,17,3,'#7b6871');line(-14,-77,-23,-94,'#9393ac',4);line(16,-76,24,-93,'#9393ac',4);
+  rect(-19,-30,7,13,'#ddd8d0');rect(13,-31,7,13,'#d0cdd0');
+ }
+ if(e.windup>0&&e.windup<12){rect(-8,-145-(boss?19:0),16,5,'#ff657c');}
+ c.restore();
+ if(!boss&&!e.dead&&e.hp<e.max){const by=y-(brute?128:108);rect(x-32,by,64,11,'#090913');rect(x-30,by+2,60,7,'#42232b');rect(x-30,by+2,60*Math.max(0,e.hp/e.max),7,brute?'#ffad65':'#f47884');rect(x-32,by,64,2,'#dfbc77')}
+ if(boss&&!e.dead){box(x-86,y-180,172,13,'#250c20','#9c6b53');rect(x-82,y-176,164*Math.max(0,e.hp)/e.max,5,'#ec4669');txt('WOUND GUARDIAN',x,y-185,12,'#ffb9bf','center')}
+}
+
+function bg(){const sky=c.createLinearGradient(0,0,0,350);sky.addColorStop(0,'#100e25');sky.addColorStop(.45,'#3c2747');sky.addColorStop(1,'#b35c43');c.fillStyle=sky;c.fillRect(0,0,W,H);for(let i=0;i<65;i++){const x=((i*163+(i*i*7))%1000),y=((i*61)%270);rect(x,y, i%3===0?3:2,2,'#f1d9a9aa')}rect(0,290,W,130,'#2d2831');for(let i=-1;i<12;i++){let x=i*112-(cam*.22%112);rect(x,135,67,191,'#252735');rect(x+6,118,55,17,'#302d37');for(let j=0;j<4;j++)rect(x+j*18,111,12,20,'#44404a');rect(x+20,180,23,81,'#151a26');rect(x+8,295,49,5,'#7a5350')}for(let i=-1;i<19;i++){let x=i*76-(cam*.48%76);rect(x,271,18,74,'#292b30');rect(x-8,266,34,13,'#4b4543');rect(x+1,253,6,14,'#4b4543');rect(x+11,253,6,14,'#4b4543')}const floor=c.createLinearGradient(0,340,0,H);floor.addColorStop(0,'#6f5445');floor.addColorStop(.35,'#37313b');floor.addColorStop(1,'#161522');c.fillStyle=floor;c.fillRect(0,345,W,H-345);for(let i=0;i<16;i++){let y=352+i*i*.8;line(0,y,W,y,'#a88b7355',1)}for(let i=-2;i<25;i++){let x=i*90-(cam*.8%90);line(x,345,x+80,H,'#18192166',2)}for(let i=0;i<25;i++){let x=i*217-(cam*.65%217),y=350+(i*37)%175;rect(x,y,9,4,'#a2745599');rect(x+16,y+5,22,3,'#221e23')}if(level===1){rect(770,125,170,232,'#201b25');rect(793,118,122,238,'#29262e');for(let k=0;k<6;k++)rect(793+k*21,108,17,16,'#48404b');rect(827,202,56,154,'#0a0911');rect(821,195,68,11,'#c47f4f');txt('DOUREN',851,168,17,'#d1af74','center')}if(level===2){rect(810,100,136,245,'#1b1828');rect(826,121,102,210,'#161421');txt('THE DEEP',875,176,14,'#c29474','center');txt('WOUND',875,194,14,'#c29474','center');for(let i=0;i<9;i++){const r=35+i*9; c.strokeStyle=i%2?'#b13d75':'#576ad2';c.lineWidth=2;c.beginPath();c.arc(880,260,r,0,6.28);c.stroke()}}}
+function drawHud(){rect(0,0,W,63,'#080811ec');rect(0,60,W,3,'#b38b48');drawHero(42,58,hero,.5,0,1,false);txt(heroes[hero].name,78,20,17,heroes[hero].color);box(77,27,254,19,'#2b1123','#d0a351');rect(81,31,246*(player.hp/player.maxhp),11,player.hp>45?'#df597a':'#e04641');txt('HP',336,43,12,'#dcc598');box(375,27,165,19,'#191b2c','#b89b54');rect(379,31,157*(player.energy/100),11,'#61badd');txt('MAGIC',548,42,12,'#9ddcec');txt('SCORE '+score,690,22,15,'#e7c17d');txt('KO '+kills,690,47,14,'#b6c9d0');/* stage title moved into objective panel below HUD */}
+function drawObjective(){
+ // Distinct stage label and objective, rendered against opaque black instead of scenery.
+ rect(188,68,584,65,'#050711');rect(188,68,584,3,'#c99c50');rect(188,130,584,3,'#77542e');
+ const stage=level===0?'STAGE I · THE ECHO ROAD':level===1?'STAGE II · FORTRESS DOUREN':'STAGE III · THE DEEP WOUND';
+ txt(stage,W/2,91,17,'#ffe2a0','center');
+ const objective=guardianDefeated?'VICTORY! THE GUARDIAN HAS FALLEN':bossSpawned?'BOSS · DEFEAT THE WOUND GUARDIAN':level===0?'REACH FORTRESS DOUREN →':level===1?'REACH THE DEEP WOUND →':'FIND THE WOUND GUARDIAN →';
+ txt(objective,W/2,117,18,bossSpawned&&!guardianDefeated?'#ff9fb0':'#f7e8c3','center');
+}
+function drawParticles(){sparks=sparks.filter(s=>s.life-->0);sparks.forEach(s=>{rect(s.x,s.y,s.size,s.size,s.col);s.x+=s.vx;s.y+=s.vy;s.vy+=.19});texts=texts.filter(s=>s.life-->0);texts.forEach(s=>{c.save();c.globalAlpha=Math.min(1,s.life/14);txt(s.s,s.x,s.y,s.type==='ko'?23:17,s.col,'center');c.restore();s.y-=s.type==='ko'?.95:.8})}
+function intro(){bg();rect(0,0,W,H,'#05030bc9');box(84,62,792,419,'#0b0b17','#be944d');txt('THE FIRST DECREE',W/2,116,36,'#efc875','center');txt('ASHES HOLD · WARDENS STAND',W/2,150,20,'#c4b0d8','center');const lines=['A fracture in the Codex has opened the Echo Road.','Beyond it lies Veyr, a kingdom with a wound beneath its oldest fortress.','The Ash Wardens must remember who they are before the Hollowborn arrive.','Four heroes cross the threshold. The fate of Douren awaits.'];lines.forEach((s,i)=>txt(s,W/2,212+i*33,16,'#d5cccb','center'));txt('PRESS ENTER OR SPACE TO ENTER VEYR',W/2,414,19,'#f6c76a','center')}
+function title(){bg();rect(0,0,W,H,'#07050bb0');box(76,38,808,466,'#0b0b19','#c79651');txt('TALES OF TITANQUISITOR',480,90,39,'#f5c56b','center');txt('ASHES HOLD — WARDENS STAND',480,122,22,'#dfc2bd','center');txt('CHOOSE YOUR HERO',480,163,18,'#f0c981','center');for(let i=0;i<4;i++){let x=120+i*185;box(x,180,166,240,hero===i?'#291c30':'#12101e',hero===i?'#ffde87':'#795c52');drawHero(x+83,333,i,1.35,0,1);txt((i+1)+'. '+heroes[i].name,x+83,367,17,heroes[i].color,'center');txt(heroes[i].weapon,x+83,389,11,'#c6b5b8','center');if(i===hero)rect(x+3,183,160,4,'#d6ad67')}txt('CLICK A HERO · 1–4 SELECT · ENTER STARTS',W/2,463,16,'#f7d38c','center')}
+function update(){if(mode==='title'){if(anyPressed('Digit1','Numpad1'))hero=0;if(anyPressed('Digit2','Numpad2'))hero=1;if(anyPressed('Digit3','Numpad3'))hero=2;if(anyPressed('Digit4','Numpad4'))hero=3;if(anyPressed('Enter','Space')){enableSound();fx('select');reset()};return}if(mode==='story'){if(anyPressed('Enter','Space','KeyJ')){enableSound();mode='play';fx('stage')};return}if(mode==='dead'||mode==='win'){if(anyPressed('Enter','Space','KeyR')){mode='title';pressed.clear()}return}if(pressedNow('KeyP'))paused=!paused;if(paused)return;if(mode!=='play')return;t++;const h=heroes[hero];let dx=0,dy=0;if(keys.has('ArrowLeft')||keys.has('KeyA'))dx--;if(keys.has('ArrowRight')||keys.has('KeyD'))dx++;if(keys.has('ArrowUp')||keys.has('KeyW'))dy--;if(keys.has('ArrowDown')||keys.has('KeyS'))dy++;if(dx&&dy){dx*=.707;dy*=.707}player.x=clamp(player.x+dx*h.speed,20,world+W-130);player.y=clamp(player.y+dy*h.speed*.72,350,493);if(dx)player.facing=Math.sign(dx);if(dx||dy)player.walk+=.2;if(player.z>0||player.vz>0){player.z+=player.vz;player.vz-=.7;if(player.z<0){player.z=0;player.vz=0}}if(pressedNow('Space')&&player.z===0){player.vz=11;fx('jump')};if((keys.has('KeyJ')||pressedNow('KeyJ'))&&player.cd<=0)attack(false);if(pressedNow('KeyK'))attack(true);player.cd=Math.max(0,player.cd-1);player.attack=Math.max(0,player.attack-1);player.special=Math.max(0,player.special-1);player.inv=Math.max(0,player.inv-1);player.energy=Math.min(100,player.energy+.065);cam=Math.max(0,player.x-250);world=Math.max(world,player.x-300);spawnClock--;if(level===0&&world>1100){level=1;fx('stage');spawnClock=75;addText(550,210,'FORTRESS DOUREN','#f8d887')}if(level===1&&world>2500){level=2;fx('stage');spawnClock=85;addText(550,210,'THE DEEP WOUND','#f8d887')}if(level===2&&world>3300&&!bossSpawned){enemies=[];spawn('boss');fx('boss');bossSpawned=true;spawnClock=999999;player.energy=Math.min(100,player.energy+40);addText(480,180,'THE WOUND GUARDIAN AWAKENS','#ff6488')}if(spawnClock<=0&&level<2){if(enemies.filter(e=>e.hp>0).length<5){spawn(Math.random()<.23?'brute':'hollow');if(world>500&&Math.random()<.42)spawn()}spawnClock=Math.max(53,135-world/45)}if(level===2&&!bossSpawned&&spawnClock<=0){if(enemies.filter(e=>e.hp>0).length<3)spawn('hollow');spawnClock=170}enemies.forEach(e=>{if(e.dead){e.death--;e.x+=e.deathVx;e.deathVx*=.89;if(e.death===25)dust(e.x-cam,e.y-15,13,'#c3b2d3');return}if(guardianDefeated)return;e.hit=Math.max(0,e.hit-1);if(e.stun>0){e.stun--;e.windup=0;return}let d=e.x-player.x;if(Math.abs(d)>45)e.x-=Math.sign(d)*e.speed;let yd=player.y-e.y;if(Math.abs(yd)>18)e.y+=Math.sign(yd)*e.speed*.65;e.face=d<0?1:-1;e.walk+=.17;e.cd--;if(e.windup>0){e.windup--;if(e.windup===0){if(Math.abs(e.x-player.x)<(e.kind==='boss'?94:66)&&Math.abs(e.y-player.y)<50&&player.z<25)hurt(e.kind==='boss'?26:e.kind==='brute'?18:11);e.cd=e.kind==='boss'?84:100}}else if(Math.abs(d)<(e.kind==='boss'?85:60)&&Math.abs(yd)<45&&e.cd<=0){e.windup=e.kind==='boss'?30:20;e.cd=999}});enemies=enemies.filter(e=>!e.dead||e.death>0);if(guardianDefeated){clearClock++;if(clearClock>=90){mode='win';pressed.clear()}}screenShake=Math.max(0,screenShake-1)}
+function play(){c.save();if(screenShake)c.translate(rand(-screenShake*.4,screenShake*.4),rand(-screenShake*.3,screenShake*.3));bg();enemies.filter(e=>e.y<player.y).sort((a,b)=>a.y-b.y).forEach(drawEnemy);if(player.inv%6<3){drawHero(player.x-cam,player.y-player.z,hero,1,player.walk,player.facing,true,player.attack>0?'attack':player.special>0?'magic':player.z>0?'jump':(keys.has('ArrowLeft')||keys.has('ArrowRight')||keys.has('ArrowUp')||keys.has('ArrowDown')||keys.has('KeyA')||keys.has('KeyD')||keys.has('KeyW')||keys.has('KeyS'))?'walk':'idle')}enemies.filter(e=>e.y>=player.y).sort((a,b)=>a.y-b.y).forEach(drawEnemy);if(player.attack>0)drawStrikeEffect(player.x-cam,player.y-player.z,hero,player.facing,player.attack);if(player.special>0){c.strokeStyle=heroes[hero].color;c.lineWidth=5;for(let i=0;i<3;i++){c.beginPath();c.ellipse(player.x-cam,player.y-36-player.z,35+(25-player.special)*8+i*19,16+(25-player.special)*2,0,0,Math.PI*2);c.stroke()}}drawParticles();drawHud();drawObjective();if(world<280&&t<120){box(260,288,440,45,'#090914','#b18a4b');txt('DEFEND THE ECHO ROAD!  →',W/2,318,22,'#ffdb8c','center');}c.restore();if(paused){rect(0,0,W,H,'#000b');txt('PAUSED',480,250,44,'#f4cd74','center');txt('PRESS P TO CONTINUE',480,290,17,'#ddd','center')}}
+function finish(win){bg();if(win)drawHero(480,502,hero,1.55,0,1,true,'win');rect(0,0,W,H,'#080812cb');box(90,72,780,390,'#100d18','#c5964f');txt(win?'ASHES HOLD!':'THE HOLLOWBORN PREVAIL',480,141,36,win?'#f8d37a':'#f27887','center');txt(win?'WARDENS STAND!':'THE DEEP WOUND WAITS...',480,188,27,win?'#f5d294':'#f5bac0','center');const s=win?['Fortress Douren survives the night.','The Wardens reclaim their oath.','Back in the Halls, movie night awaits...']:['The gates of Douren fall silent.','But the Codex remembers every story.','Choose another hero and rise again.'];s.forEach((v,i)=>txt(v,480,251+i*32,17,'#ded5d6','center'));txt('SCORE '+score+'    HOLLOWBORN DEFEATED '+kills,480,367,17,'#f2c572','center');txt('PRESS ENTER TO SELECT A HERO',480,416,15,'#fff1bf','center')}
+function draw(){c.clearRect(0,0,W,H);if(mode==='title')title();else if(mode==='story')intro();else if(mode==='play')play();else finish(mode==='win');screen.clearRect(0,0,canvas.width,canvas.height);screen.drawImage(low,0,0,canvas.width,canvas.height)}
+function frame(){update();draw();requestAnimationFrame(frame)}window.addEventListener('keydown',e=>{if(!e.repeat&&['Enter','Space','KeyJ','KeyK'].includes(e.code))enableSound();if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(e.code))e.preventDefault();if(!keys.has(e.code))pressed.add(e.code);keys.add(e.code)});window.addEventListener('keyup',e=>keys.delete(e.code));window.addEventListener('blur',()=>{keys.clear();pressed.clear()});canvas.addEventListener('pointerdown',e=>{enableSound();if(mode==='title'){let r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;if(y>175&&y<440){hero=clamp(Math.floor((x-120)/185),0,3);reset()}else reset()}else if(mode==='story')mode='play';else if(mode==='dead'||mode==='win')mode='title'});document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();enableSound();if(!keys.has(k))pressed.add(k);keys.add(k)};const up=e=>{e.preventDefault();keys.delete(k)};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up);b.addEventListener('pointerleave',up)});const status=document.getElementById('controller-status');
+const gpKeys=new Set();let lastPadName='';
+function gamepad(){
+    let pads=[];
+    try{pads=typeof navigator.getGamepads==='function'?Array.from(navigator.getGamepads()).filter(Boolean):[]}catch(e){pads=[]}
+    const pad=pads[0];
+    if(pad){
+        const name=pad.id||'Controller';
+        if(lastPadName!==name){status.textContent='Controller detected: '+name+' · A attack · B magic · X jump · Start';lastPadName=name}
+        const axes=pad.axes||[],buttons=pad.buttons||[];
+        const held=(i)=>!!buttons[i]?.pressed;
+        const mapping=[['ArrowLeft',(axes[0]||0)<-.3||held(14)],['ArrowRight',(axes[0]||0)>.3||held(15)],['ArrowUp',(axes[1]||0)<-.3||held(12)],['ArrowDown',(axes[1]||0)>.3||held(13)],['KeyJ',held(0)||held(2)],['KeyK',held(1)||held(3)],['Space',held(4)||held(5)],['Enter',held(9)||held(7)]];
+        for(const [key,on] of mapping){
+            if(on){if(!gpKeys.has(key))pressed.add(key);gpKeys.add(key);keys.add(key)}
+            else if(gpKeys.has(key)){gpKeys.delete(key);keys.delete(key)}
+        }
+        // D-pad or shoulder buttons may choose the hero while on the title screen.
+        if(mode==='title'){
+          if(held(12)&&!padPrev.heroUp)hero=(hero+3)%4;
+          if(held(13)&&!padPrev.heroDown)hero=(hero+1)%4;
+          padPrev.heroUp=held(12);padPrev.heroDown=held(13);
+        }
+    }else{
+        if(lastPadName){status.textContent='Controller disconnected · Keyboard and on-screen controls still work';lastPadName=''}
+        for(const key of gpKeys){gpKeys.delete(key);keys.delete(key)}
+    }
+    requestAnimationFrame(gamepad)
+}
+window.addEventListener('gamepadconnected', e=>{status.textContent='Controller connected: '+(e.gamepad.id||'Controller')+' · Press Start to begin'});
+requestAnimationFrame(gamepad);requestAnimationFrame(frame)})();
+</script></body></html>
