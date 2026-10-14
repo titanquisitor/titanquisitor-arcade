@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.2.1 Stinger Stabilization</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.2.2 Movement & Cleanup</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
 .audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
-</style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.2.1</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
+</style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.2.2</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
 <script>
 (()=>{'use strict';const canvas=document.querySelector('#game');
 const low=document.createElement('canvas');low.width=480;low.height=270;
@@ -114,6 +114,35 @@ function drawStrikeEffect(x,y,id,facing,remaining){
  c.restore();
 }
 const stingerAtlas=new Image();
+let cleanedStingerAtlas=null;
+stingerAtlas.onload=()=>{
+ // Remove isolated debris that was accidentally captured in the illustrated sprite sheet.
+ try{
+  const cv=document.createElement('canvas');cv.width=770;cv.height=272;
+  const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(stingerAtlas,0,0);
+  const data=cx.getImageData(0,0,770,272),pix=data.data;
+  for(let cell=0;cell<14;cell++){
+   const ox=(cell%7)*110,oy=Math.floor(cell/7)*136,seen=new Uint8Array(110*136);
+   for(let sy=0;sy<136;sy++)for(let sx=0;sx<110;sx++){
+    const seed=sy*110+sx;if(seen[seed])continue;
+    const alpha=pix[((oy+sy)*770+ox+sx)*4+3];
+    if(alpha<85){seen[seed]=1;continue}
+    const group=[],stack=[seed];seen[seed]=1;
+    while(stack.length){
+     const p=stack.pop(),x=p%110,y=(p/110)|0;group.push(p);
+     for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+      if(!dx&&!dy)continue;const xx=x+dx,yy=y+dy;
+      if(xx<0||xx>=110||yy<0||yy>=136)continue;
+      const ni=yy*110+xx;if(seen[ni])continue;seen[ni]=1;
+      if(pix[((oy+yy)*770+ox+xx)*4+3]>=85)stack.push(ni);
+     }
+    }
+    if(group.length<250)for(const pos of group)pix[((oy+((pos/110)|0))*770+ox+(pos%110))*4+3]=0;
+   }
+  }
+  cx.putImageData(data,0,0);cleanedStingerAtlas=cv;
+ }catch(e){cleanedStingerAtlas=null}
+};
 stingerAtlas.src='assets/stinger-atlas.webp';
 function drawHero(x,y,id,scale=1,walk=0,facing=1,weapon=true,pose='idle'){
  let action=pose;if(action==='idle'&&Math.abs(walk)>.7)action='walk';
@@ -131,7 +160,7 @@ function drawHero(x,y,id,scale=1,walk=0,facing=1,weapon=true,pose='idle'){
    else if(action==='magic')frame=13;
    else frame=phase;
    const sx=(frame%7)*110,sy=Math.floor(frame/7)*136;
-   c.drawImage(stingerAtlas,sx,sy,110,136,-39,-110,78,110);
+   c.drawImage(cleanedStingerAtlas||stingerAtlas,sx,sy,110,136,-39,-110,78,110);
  }else{
    const sprite=makeSprite(id,action,phase);
    c.drawImage(sprite,-36,-108,72,108);
@@ -293,7 +322,16 @@ const tqProceduralBackdrop=bg;
 bg=function(){
  const art=tqStageBackdrops[level];
  if(art&&art.complete&&art.naturalWidth>0){
-   c.drawImage(art,0,0,W,H);
+   // Move the actual illustrated scenery with the camera; mirror alternate tiles
+   // to avoid sudden hard seams at each repeat.
+   const tw=1100,travel=cam*.55,first=Math.floor(travel/tw);
+   for(let i=first-1;i<=first+2;i++){
+     const dx=i*tw-travel;
+     c.save();
+     if(i%2){c.translate(dx+tw,0);c.scale(-1,1);c.drawImage(art,0,0,tw,H)}
+     else c.drawImage(art,dx,0,tw,H);
+     c.restore();
+   }
    // A soft animated rift glow above the illustrated Deep Wound arena.
    if(level===2){
      c.save();c.globalAlpha=.1+Math.sin(t*.065)*.07;
@@ -340,7 +378,24 @@ function title(){
   txt('WEAPON: '+h.weapon+'     SPECIAL: '+h.special,480,456,15,'#f8f2e4','center');
   txt('1–4 OR D-PAD TO CHOOSE    ·    ENTER / START TO PLAY',480,499,17,'#ffffff','center');
 }
-function update(){if(mode==='title'){if(anyPressed('Digit1','Numpad1'))hero=0;if(anyPressed('Digit2','Numpad2'))hero=1;if(anyPressed('Digit3','Numpad3'))hero=2;if(anyPressed('Digit4','Numpad4'))hero=3;if(anyPressed('Enter','Space')){enableSound();fx('select');reset()};return}if(mode==='story'){if(anyPressed('Enter','Space','KeyJ')){enableSound();mode='play';fx('stage')};return}if(mode==='dead'||mode==='win'){if(anyPressed('Enter','Space','KeyR')){mode='title';pressed.clear()}return}if(pressedNow('KeyP'))paused=!paused;if(paused)return;if(mode!=='play')return;t++;const h=heroes[hero];let dx=0,dy=0;if(keys.has('ArrowLeft')||keys.has('KeyA'))dx--;if(keys.has('ArrowRight')||keys.has('KeyD'))dx++;if(keys.has('ArrowUp')||keys.has('KeyW'))dy--;if(keys.has('ArrowDown')||keys.has('KeyS'))dy++;if(dx&&dy){dx*=.707;dy*=.707}player.x=clamp(player.x+dx*h.speed,20,world+W-130);player.y=clamp(player.y+dy*h.speed*.72,350,493);if(dx)player.facing=Math.sign(dx);if(dx||dy)player.walk+=.2;if(player.z>0||player.vz>0){player.z+=player.vz;player.vz-=.7;if(player.z<0){player.z=0;player.vz=0}}if(pressedNow('Space')&&player.z===0){player.vz=11;fx('jump')};if((keys.has('KeyJ')||pressedNow('KeyJ'))&&player.cd<=0)attack(false);if(pressedNow('KeyK'))attack(true);player.cd=Math.max(0,player.cd-1);player.attack=Math.max(0,player.attack-1);player.special=Math.max(0,player.special-1);player.inv=Math.max(0,player.inv-1);player.energy=Math.min(100,player.energy+.065);// Camera deadzone lets the player visibly cross the scene before the world scrolls.
+function update(){if(mode==='title'){if(anyPressed('Digit1','Numpad1'))hero=0;if(anyPressed('Digit2','Numpad2'))hero=1;if(anyPressed('Digit3','Numpad3'))hero=2;if(anyPressed('Digit4','Numpad4'))hero=3;if(anyPressed('Enter','Space')){enableSound();fx('select');reset()};return}if(mode==='story'){if(anyPressed('Enter','Space','KeyJ')){enableSound();mode='play';fx('stage')};return}if(mode==='dead'||mode==='win'){if(anyPressed('Enter','Space','KeyR')){mode='title';pressed.clear()}return}if(pressedNow('KeyP'))paused=!paused;if(paused)return;if(mode!=='play')return;t++;const h=heroes[hero];let dx=0,dy=0;if(keys.has('ArrowLeft')||keys.has('KeyA'))dx--;if(keys.has('ArrowRight')||keys.has('KeyD'))dx++;if(keys.has('ArrowUp')||keys.has('KeyW'))dy--;if(keys.has('ArrowDown')||keys.has('KeyS'))dy++;if(dx&&dy){dx*=.707;dy*=.707}const previousX=player.x,previousY=player.y;
+player.x=clamp(player.x+dx*h.speed,20,Math.max(850,world+W-130));
+player.y=clamp(player.y+dy*h.speed*.72,350,493);
+// Close-range body blocking: characters can circle around or jump over enemies.
+// Keep a small overlap allowance so close-range attacks still connect.
+if(player.z<24){
+ for(const e of enemies){
+  if(e.dead||e.hp<=0)continue;
+  const r=e.kind==='boss'?60:e.kind==='brute'?37:29;
+  if(Math.abs(e.x-player.x)<r&&Math.abs(e.y-player.y)<22){
+   if(dx&&Math.abs(e.x-previousX)>=r-2)player.x=previousX;
+   if(dy&&Math.abs(e.y-previousY)>=20)player.y=previousY;
+   if(Math.abs(e.x-player.x)<r&&Math.abs(e.y-player.y)<22&&dx){
+    player.x=e.x+(previousX<=e.x?-r:r);
+   }
+  }
+ }
+}if(dx)player.facing=Math.sign(dx);if(dx||dy)player.walk+=.2;if(player.z>0||player.vz>0){player.z+=player.vz;player.vz-=.7;if(player.z<0){player.z=0;player.vz=0}}if(pressedNow('Space')&&player.z===0){player.vz=11;fx('jump')};if((keys.has('KeyJ')||pressedNow('KeyJ'))&&player.cd<=0)attack(false);if(pressedNow('KeyK'))attack(true);player.cd=Math.max(0,player.cd-1);player.attack=Math.max(0,player.attack-1);player.special=Math.max(0,player.special-1);player.inv=Math.max(0,player.inv-1);player.energy=Math.min(100,player.energy+.065);// Camera deadzone lets the player visibly cross the scene before the world scrolls.
 let sxPlayer=player.x-cam;
 if(sxPlayer>690)cam=player.x-690;
 else if(sxPlayer<210)cam=Math.max(0,player.x-210);
