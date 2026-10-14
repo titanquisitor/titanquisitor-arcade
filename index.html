@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.3.5 Fair Escape</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.4 Theia Joins the Halls</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
 .audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
 </style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.3</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
@@ -144,12 +144,88 @@ stingerAtlas.onload=()=>{
  }catch(e){cleanedStingerAtlas=null}
 };
 stingerAtlas.src='assets/stinger-atlas.webp';
+
+const theiaSpriteCache=new Map();
+function makeTheiaSprite(pose='idle',phase=0){
+ const key=pose+':'+phase;if(theiaSpriteCache.has(key))return theiaSpriteCache.get(key);
+ const cv=document.createElement('canvas');cv.width=96;cv.height=144;
+ const q=cv.getContext('2d');q.imageSmoothingEnabled=false;
+ const pixel=(x,y,w,h,color)=>{q.fillStyle=color;q.fillRect(Math.round(x),Math.round(y),w,h)};
+ const path=(pts,color)=>{q.fillStyle=color;q.beginPath();q.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)q.lineTo(pts[i][0],pts[i][1]);q.closePath();q.fill()};
+ const walking=pose==='walk',jumping=pose==='jump',casting=pose==='magic',attacking=pose==='attack',winning=pose==='win'||pose==='victory';
+ const motion=walking?(phase?3:-3):0,bob=walking?(phase?-2:1):0;
+ q.save();q.translate(0,bob+(jumping?-7:0));
+ // Theia's extraordinarily long windswept auburn hair, behind the shoulders.
+ path([[39,30],[24,39],[11,52],[5,73],[13,75],[12,91],[26,80],[34,90],[42,75],[56,40],[53,26]],'#71321f');
+ path([[37,32],[21,42],[11,58],[17,56],[9,77],[29,65],[34,83],[43,69],[50,34]],'#af532c');
+ path([[35,33],[22,46],[13,56],[29,49],[19,69],[34,58],[42,68],[47,36]],'#d7793a');
+ pixel(15,59,3,13,'#e89d53');pixel(23,47,3,17,'#f0a962');
+ // Dark shadow under gown, separate animated boots.
+ pixel(43+motion,124,10,13,'#7d4e36');pixel(57-motion,125,9,12,'#7d4e36');
+ pixel(42+motion,135,14,3,'#ddaa59');pixel(55-motion,135,14,3,'#ddaa59');
+ // Flowing cream outer skirt and long pointed train.
+ path([[40,80],[60,79],[65,95],[81,134],[60,135],[52,128],[32,138],[12,133],[29,101]],'#a97d44');
+ path([[41,78],[59,80],[67,108],[78,129],[62,130],[53,121],[34,134],[17,130],[32,96]],'#f6edda');
+ path([[44,87],[50,88],[43,121],[32,133],[22,131],[35,103]],'#ffffff');
+ path([[52,85],[60,92],[64,120],[74,128],[62,127]],'#e7cfac');
+ path([[38,91],[33,105],[21,128],[27,130],[39,109]],'#d4ac60');
+ pixel(38,89,3,28,'#e7c477');pixel(59,91,3,25,'#d8a84d');
+ // Torso: intricately trimmed white tunic and gold armored waist.
+ path([[41,56],[58,54],[64,77],[59,91],[38,91],[35,74]],'#bc8a37');
+ path([[42,56],[57,56],[61,76],[56,83],[41,82],[39,70]],'#fcf7e8');
+ path([[40,59],[45,61],[49,75],[46,81],[43,75]],'#d5a54a');
+ path([[56,60],[60,62],[57,78],[52,81],[52,75]],'#d5a54a');
+ pixel(39,82,22,7,'#ba8333');pixel(42,84,17,3,'#f3cf70');pixel(48,83,5,5,'#55b8f1');
+ // Back arm, then face and red hairline.
+ path([[39,58],[32,63],[28,86],[31,89],[37,87],[43,69]],'#d9966e');
+ pixel(27,84,7,8,'#eeb88e');pixel(28,88,6,3,'#c77a53');
+ path([[41,28],[52,24],[61,31],[61,46],[55,55],[44,53],[40,42]],'#c6855f');
+ path([[43,29],[55,27],[60,35],[58,46],[53,51],[45,48],[42,39]],'#f2bd92');
+ pixel(56,37,3,2,'#243d60');pixel(55,36,2,1,'#ffffff');pixel(58,44,3,1,'#a95b53');
+ // Signature cascaded red hair, foreground locks, laurel and gold earrings.
+ path([[40,28],[38,43],[33,54],[40,57],[44,46],[43,32],[51,28],[59,33],[63,38],[64,32],[59,23],[48,21]],'#8b3b23');
+ path([[42,23],[36,28],[33,40],[40,37],[44,30],[51,26],[57,30],[61,28],[56,21]],'#cd6b35');
+ pixel(33,34,4,15,'#dc8241');pixel(39,45,3,13,'#9d4829');
+ pixel(40,25,20,3,'#f3c45c');pixel(43,22,4,6,'#fff0a0');pixel(50,21,4,6,'#dfac3e');pixel(57,24,4,5,'#ffe08b');pixel(60,43,2,6,'#e9bc56');
+ // Extended forearm with staff: attacks and spells thrust forward.
+ const handX=attacking?80:casting?75:72,handY=attacking?66:casting?55:64;
+ path([[59,61],[65,58],[handX,handY-4],[handX+2,handY+3],[65,68],[58,72]],'#c78e5c');
+ path([[61,60],[67,60],[handX,handY-2],[handX,handY+2],[66,66]],'#f0b78b');
+ pixel(handX-2,handY-4,7,8,'#efbc95');
+ // The ornate golden staff extends above her head, with sapphire jewel.
+ const staffX=attacking?83:casting?80:78,staffTip=attacking?28:casting?13:15;
+ pixel(staffX,staffTip+13,3,114-staffTip,'#704521');
+ pixel(staffX+1,staffTip+13,3,112-staffTip,'#f5c56b');
+ pixel(staffX-4,staffTip+5,12,18,'#b98232');
+ pixel(staffX-2,staffTip+3,9,17,'#ffdc7e');
+ pixel(staffX+1,staffTip,4,7,'#f6df91');
+ pixel(staffX,staffTip+8,6,9,'#2d63bb');
+ pixel(staffX+1,staffTip+9,4,7,'#50c7ff');
+ pixel(staffX+2,staffTip+9,2,3,'#e9ffff');
+ // Sapphire spell flare.
+ if(attacking||casting){
+  const radius=casting?12:8;
+  q.save();q.globalAlpha=.3;q.fillStyle='#49aefa';q.beginPath();q.arc(staffX+3,staffTip+13,radius+5,0,7);q.fill();q.restore();
+  pixel(staffX-radius/2+3,staffTip+10,radius,5,'#61bfff');
+  pixel(staffX+1,staffTip+6,4,16,'#daf7ff');
+  if(casting){pixel(66,17,4,4,'#bfefff');pixel(87,29,3,3,'#86d0ff');pixel(70,47,3,3,'#ffe9a9')}
+ }
+ if(winning){
+  pixel(24,26,5,30,'#f5c08f');pixel(22,19,10,10,'#ffe0aa');
+  pixel(19,15,4,4,'#e7c465');pixel(29,13,3,3,'#aee9ff');
+ }
+ q.restore();theiaSpriteCache.set(key,cv);return cv;
+}
+
 function drawHero(x,y,id,scale=1,walk=0,facing=1,weapon=true,pose='idle'){
  let action=pose;if(action==='idle'&&Math.abs(walk)>.7)action='walk';
  const phase=(Math.floor(Math.abs(walk)*2)%2);
  c.save();c.translate(Math.round(x),Math.round(y));c.scale(facing*scale,scale);
  rect(-21,0,42,4,'#0008');c.imageSmoothingEnabled=false;
- if(id===3&&stingerAtlas.complete&&stingerAtlas.naturalWidth>=770){
+ if(id===2){
+   const sprite=makeTheiaSprite(action,phase);
+   c.drawImage(sprite,-46,-114,92,114);
+ }else if(id===3&&stingerAtlas.complete&&stingerAtlas.naturalWidth>=770){
    // 14 isolated art frames in a 7 x 2 atlas, each 110 x 136.
    let frame=0;
    if(action==='walk')frame=2+(Math.floor(Math.abs(walk)*3)%4);
