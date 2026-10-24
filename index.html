@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.5.1 Theia Sprite Cleanup</title><style>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"><title>Tales of Titanquisitor: Wardens Stand — Playable Prototype v1.6 Thalia Unleashed</title><style>
 :root{color-scheme:dark}*{box-sizing:border-box}body{margin:0;background:#050509;color:#f4dba8;font-family:Georgia,serif;display:flex;justify-content:center;min-height:100vh;background-image:radial-gradient(ellipse at top,#21132c,#050509 70%)}.shell{width:min(1100px,100%);padding:12px}.mast{text-align:center;margin:4px 0 8px;letter-spacing:2px;text-shadow:0 2px #000}.mast small{font:700 10px system-ui;letter-spacing:3px;color:#e4a647}.mast h1{margin:4px 0;font-size:clamp(20px,3.6vw,38px);color:#f6c76c;text-shadow:2px 2px #70361a,0 0 20px #d45b2544}.mast p{margin:4px;font:12px system-ui;color:#afa4ae}.frame{border:4px ridge #bf8c3d;box-shadow:0 0 0 3px #241329,0 12px 35px #000;position:relative;background:#06060c}canvas{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges;touch-action:none}.hint{font:12px system-ui;color:#b9aeb4;text-align:center;line-height:1.6;margin:10px 0}.hint b{color:#f1cf78}.controls{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:12px}.game-status{text-align:center;color:#e2bf78;font:12px system-ui;margin:8px 0}.controls button{background:#24162e;border:2px solid #9d713d;color:#f5d798;font:700 15px system-ui;border-radius:7px;min-height:56px;touch-action:none;user-select:none}.controls button:active{background:#8a3068}footer{text-align:center;color:#8e8391;font:11px system-ui;margin:9px}@media(pointer:coarse){.controls{display:grid}.hint{font-size:11px}}@media(max-width:650px){.shell{padding:4px}.controls{gap:4px}.controls button{min-height:49px;font-size:12px}.mast{margin:0}.hint{margin:5px}}
 .audio-options{display:flex;gap:12px;align-items:center;justify-content:center;margin:10px auto 3px;font:12px system-ui;color:#b7a7ae}.audio-options button{border:1px solid #c39c5a;border-radius:4px;background:#191324;color:#f3d48b;padding:8px 15px;font-weight:bold;cursor:pointer}.audio-options button:hover{background:#39233e}.audio-options button:focus-visible{outline:3px solid #f9d78f} @media(max-width:650px){.audio-options{flex-wrap:wrap;font-size:10px}}
 </style></head><body><main class="shell"><header class="mast"><small>TITANQUISITOR PRESENTS · A 16-BIT ADVENTURE</small><h1>TALES OF TITANQUISITOR</h1><p>ASHES HOLD · WARDENS STAND — PLAYABLE PROTOTYPE v1.5.1</p></header><div class="frame"><canvas id="game" width="960" height="540" aria-label="Playable pixel-art action game"></canvas></div><div class="controls" aria-label="Game controls"><button data-key="ArrowLeft">◀</button><button data-key="ArrowUp">▲</button><button data-key="ArrowDown">▼</button><button data-key="ArrowRight">▶</button><button data-key="KeyJ">ATTACK</button><button data-key="KeyK">MAGIC</button><button data-key="Space" style="grid-column:span 6;min-height:35px">JUMP / START</button></div><div class="audio-options"><button type="button" id="sound-toggle" aria-pressed="true">♫ SOUND ON</button><span>Original retro-style music &amp; SFX · Readable HUD · Enemy death animations · 480 × 270 pixel rendering</span></div><div class="game-status" id="controller-status" role="status">Keyboard ready · Press J to swing · Connect a controller and press any button</div><div class="hint"><b>Move</b> WASD / Arrow Keys &nbsp;·&nbsp; <b>Attack</b> J &nbsp;·&nbsp; <b>Special</b> K &nbsp;·&nbsp; <b>Jump</b> Space &nbsp;·&nbsp; <b>Pause</b> P &nbsp;·&nbsp; <b>Restart</b> R<br>Controller support: D-pad / left stick, A attack, B special, X jump. Select a hero with 1–4 or click a portrait. Defeat the Hollowborn and the Wound Guardian!</div><footer>Unofficial 16-bit-style browser prototype for the Tales of Titanquisitor project · High-contrast character selection and results · Clear combat feedback · Original synthesized retro soundtrack · Offline, no external libraries</footer></main>
@@ -272,12 +272,96 @@ function makeTheiaSprite(pose='idle',phase=0){
  q.restore();theiaSpriteCache.set(key,cv);return cv;
 }
 
+
+const thaliaSpriteCache=new Map();
+// v1.6: detailed, fixed-geometry 96x144 Thalia sprites. Sprite poses are
+// rendered individually to avoid contaminated neighboring atlas frames.
+function makeThaliaSprite(action='idle',phase=0){
+ const key=action+':'+phase;if(thaliaSpriteCache.has(key))return thaliaSpriteCache.get(key);
+ const cv=document.createElement('canvas');cv.width=96;cv.height=144;
+ const q=cv.getContext('2d');q.imageSmoothingEnabled=false;
+ const px=(x,y,w,h,col)=>{q.fillStyle=col;q.fillRect(Math.round(x),Math.round(y),w,h)};
+ const poly=(a,col)=>{q.fillStyle=col;q.beginPath();q.moveTo(a[0][0],a[0][1]);for(let i=1;i<a.length;i++)q.lineTo(a[i][0],a[i][1]);q.closePath();q.fill()};
+ const circ=(x,y,r,col)=>{q.fillStyle=col;q.beginPath();q.arc(x,y,r,0,Math.PI*2);q.fill()};
+ const walking=action==='walk',jumping=action==='jump',attacking=action==='attack',casting=action==='magic',hurt=action==='hurt',victory=action==='win'||action==='victory';
+ const step=walking?[-3,-1,2,0][phase%4]:0;
+ const bob=walking?[0,-2,-1,0][phase%4]:0;
+ q.save();q.translate(0,bob+(jumping?-7:0)+(hurt?2:0));
+ // Thick black curls are part of her unmistakable silhouette.
+ poly([[32,26],[22,28],[14,41],[9,59],[13,76],[5,90],[23,86],[30,97],[42,85],[58,91],[70,78],[67,57],[73,49],[62,26],[46,19]],'#100d18');
+ const curls=[[24,36,9],[17,47,8],[20,62,9],[14,76,8],[26,83,9],[36,74,8],[57,35,11],[65,49,8],[60,65,11],[66,76,8],[50,84,10],[32,28,11],[43,24,11]];
+ for(const [x,y,r] of curls){circ(x,y,r,'#20151d');circ(x-2,y-2,r*.68,'#37202b');circ(x-3,y-4,r*.27,'#74523e')}
+ // Black-and-gold split battle skirt, trailing scarf and gold greaves.
+ poly([[36,81],[61,80],[67,99],[79,127],[67,130],[51,112],[30,137],[15,131],[30,93]],'#b88737');
+ poly([[38,81],[60,81],[66,108],[75,123],[63,124],[51,106],[28,132],[18,126],[32,94]],'#231527');
+ poly([[36,91],[28,120],[17,127],[31,128],[48,101]],'#674222');
+ poly([[57,92],[68,119],[74,126],[63,123],[52,105]],'#d2a74b');
+ poly([[33,95],[43,99],[38,126],[27,135],[20,131]],'#443040');
+ poly([[57,101],[63,117],[73,129],[66,129],[51,111]],'#5b3443');
+ // Animated legs, gold greaves and boots.
+ const lx=37+step,rx=55-step;
+ poly([[36,89],[46,90],[lx+6,132],[lx-3,133]],'#c98b60');
+ poly([[55,89],[64,92],[rx+9,131],[rx,133]],'#cc8d60');
+ px(lx-2,113,12,21,'#c99940');px(rx,114,12,19,'#d8a747');
+ px(lx,116,7,10,'#f6d778');px(rx+2,116,8,10,'#efd36a');
+ px(lx-5,132,17,5,'#392b2b');px(rx-1,132,17,5,'#392b2b');
+ px(lx-4,131,14,2,'#e4b353');px(rx+1,131,14,2,'#d8ab4a');
+ // Torso: ornamental black-and-gold armor.
+ poly([[38,54],[56,54],[64,70],[61,91],[36,91],[32,73]],'#ba842b');
+ poly([[41,56],[55,56],[61,69],[57,82],[39,82],[36,68]],'#211720');
+ poly([[43,59],[49,65],[54,58],[58,67],[52,75],[42,75],[37,66]],'#d1a049');
+ poly([[45,62],[49,67],[53,62],[56,69],[48,76],[40,68]],'#3c2631');
+ px(36,79,26,8,'#dbaf50');px(38,82,21,3,'#ffdf7d');circ(49,83,5,'#a66b25');circ(49,82,2,'#ffdfa0');
+ // Bare arms, with bracelets and active dagger hands.
+ const rightX=attacking?85:casting?73:victory?76:74;
+ const rightY=attacking?64:casting?33:victory?26:73;
+ const leftX=attacking?23:casting?19:victory?21:20;
+ const leftY=attacking?75:casting?34:victory?29:78;
+ poly([[38,58],[32,60],[leftX-2,leftY-5],[leftX+4,leftY+4],[38,72]],'#c78b61');
+ poly([[55,57],[62,59],[rightX+1,rightY-3],[rightX+4,rightY+4],[57,70]],'#edac77');
+ px(leftX-2,leftY-4,6,8,'#b97945');px(rightX,rightY-4,7,8,'#e9b07a');
+ px(leftX-4,leftY-9,9,3,'#e0a948');px(rightX-2,rightY-9,10,3,'#e1b75c');
+ // Expressive smiling face, gold laurel and enormous hoop earring.
+ poly([[39,27],[53,24],[61,31],[61,45],[56,55],[44,52],[38,40]],'#c78760');
+ poly([[41,29],[53,28],[59,35],[57,47],[51,51],[43,47]],'#f1b68c');
+ px(56,37,3,2,'#151824');px(57,36,2,1,'#ffffff');px(55,44,5,2,hurt?'#9e4c53':'#b15c58');
+ px(43,26,18,4,'#392329');px(40,24,13,5,'#21151e');
+ px(39,28,4,18,'#26171f');px(33,40,6,15,'#21151e');
+ px(43,26,17,2,'#dfac46');px(42,23,5,5,'#f5d477');px(48,21,4,5,'#eac363');px(55,23,5,5,'#ffdc7a');
+ circ(61,49,3,'#dfb655');circ(61,49,1,'#221b24');
+ // Twin daggers have independent grips and steel blades, always attached.
+ function blade(hx,hy,left=false,raised=false){
+  px(hx-2,hy-2,8,4,'#e8bd60');px(hx+1,hy-5,3,11,'#8d6532');
+  const dir=left?-1:1,up=raised?-1:1;
+  poly([[hx+dir*4,hy],[hx+dir*9,hy-up*4],[hx+dir*19,hy-up*20],[hx+dir*17,hy-up*6],[hx+dir*8,hy+up*3]],'#98a5ad');
+  poly([[hx+dir*6,hy],[hx+dir*11,hy-up*4],[hx+dir*19,hy-up*20],[hx+dir*12,hy-up*5]],'#f7f6df');
+ }
+ blade(rightX+3,rightY,true,victory);blade(leftX,leftY,true,attacking||jumping);
+ if(attacking){
+  const sweep=phase%3;
+  q.save();q.globalAlpha=.86;q.strokeStyle='#f6c45e';q.lineWidth=6;
+  q.beginPath();q.arc(65,72,23,-1.5+sweep*.35,.45+sweep*.2);q.stroke();
+  q.strokeStyle='#fff0af';q.lineWidth=2;q.beginPath();q.arc(65,72,26,-1.5+sweep*.35,.45+sweep*.2);q.stroke();q.restore();
+ }
+ if(casting){
+  q.save();q.globalAlpha=.7;q.strokeStyle='#f8c653';q.lineWidth=4;
+  q.beginPath();q.ellipse(49,70,39,14,-.25,0,Math.PI*2);q.stroke();
+  q.beginPath();q.ellipse(49,83,30,24,.7,0,Math.PI*2);q.stroke();q.restore();
+  for(let i=0;i<6;i++)circ(18+i*12,25+(i%3)*8,2,i%2?'#ffe89b':'#ffb8d6');
+ }
+ if(victory){circ(19,18,3,'#fbd76f');circ(76,17,4,'#ffe7b6');px(64,18,3,3,'#ffffff')}
+ q.restore();thaliaSpriteCache.set(key,cv);return cv;
+}
+
 function drawHero(x,y,id,scale=1,walk=0,facing=1,weapon=true,pose='idle'){
  let action=pose;if(action==='idle'&&Math.abs(walk)>.7)action='walk';
  const phase=(Math.floor(Math.abs(walk)*2)%2);
  c.save();c.translate(Math.round(x),Math.round(y));c.scale(facing*scale,scale);
  rect(-21,0,42,4,'#0008');c.imageSmoothingEnabled=false;
- if(id===2){
+ if(id===1){
+   const frame=action==='walk'?Math.floor(Math.abs(walk)*4)%4:action==='attack'?Math.max(0,Math.min(2,Math.floor((12-(player?player.attack:0))/4))):0;
+   c.drawImage(makeThaliaSprite(action,frame),-43,-114,86,114);
+ }else if(id===2){
    if(theiaArtAtlas.complete&&theiaArtAtlas.naturalWidth===150){
      drawIllustratedTheia(action,walk);
    }else{
